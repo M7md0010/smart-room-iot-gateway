@@ -1,68 +1,45 @@
-# Smart Room IoT Gateway - ESP32 RainMaker 4-Relay Controller
+# ⚡ ESP32 Voice-Controlled Smart Room (Cloud-Only)
 
-An ESP32-based smart room controller utilizing **ESP RainMaker** for cloud connectivity, featuring state persistence using EEPROM, active-high/low relay configuration, and software-based anti-flicker protection.
+A lightweight, headless room automation system built on the ESP32 platform, integrated directly with ESP RainMaker and Google Assistant for seamless voice control. 
 
-## Features
-
-- **ESP RainMaker Cloud Integration:** Control appliances remotely using the ESP RainMaker app (iOS/Android) or voice assistants (Alexa, Google Assistant).
-- **WiFi Provisioning over BLE:** Easy provisioning using the ESP RainMaker app with secure BLE configuration.
-- **EEPROM State Persistence:** Automatically saves and restores the last relay states on power cycles or sudden restarts.
-- **Software Anti-Flicker Protection:** Implements a state-change guard interval (80ms buffer) to prevent relay bouncing/flickering.
-- **Dynamic Device Support:** Creates four virtual Switch devices:
-  1. `Lights in`
-  2. `Lights out`
-  3. `White LED`
-  4. `Yellow LED`
+Designed for embedded stability, this firmware handles asynchronous Wi-Fi reconnections, real-time state management, and secure webhook processing without relying on commercial smart home hubs or local physical switches.
 
 ---
 
-## Hardware Configuration
+## ✨ Features
+* **100% Cloud/Voice Driven:** Lean architecture with no physical switch polling overhead.
+* **Google Assistant Native:** Works instantly with Google Home via ESP RainMaker integration.
+* **Non-Volatile State Memory:** Remembers relay states after a power outage using EEPROM.
+* **Anti-Flicker Guard:** Software debouncing (80ms buffer) prevents relay chatter from rapid cloud requests.
+* **Active-Low/High Configurable:** Easily swap logic states depending on your specific relay module.
 
-### GPIO Pin Mapping
+## 🛠️ Hardware Requirements
+* **Microcontroller:** ESP32 Development Board (e.g., NodeMCU-32S)
+* **Actuators:** 4-Channel Relay Module (5V/3.3V)
+* **Power:** 5V Power Supply (Make sure it can handle the relay coil current)
 
-| Component | ESP32 GPIO | Description |
+### 🔌 Pin Mapping (Default)
+| Device | ESP32 GPIO | Notes |
 | :--- | :--- | :--- |
-| **Relay 1** | `GPIO 26` | Control pin for "Lights in" |
-| **Relay 2** | `GPIO 25` | Control pin for "Lights out" |
-| **Relay 3** | `GPIO 33` | Control pin for "White LED" |
-| **Relay 4** | `GPIO 32` | Control pin for "Yellow LED" |
+| **Relay 1** (Lights in) | `GPIO 26` | Change `RELAY_ON` to `LOW` if using Active-Low relays |
+| **Relay 2** (Lights out) | `GPIO 25` | |
+| **Relay 3** (White LED) | `GPIO 33` | |
+| **Relay 4** (Yellow LED) | `GPIO 32` | |
 | **WiFi LED** | `GPIO 13` | Indication LED for WiFi connection status |
 
-### Relay Logic Configuration
+## 🚀 Setup & Installation
 
-Depending on the type of relay module used (Active-High or Active-Low), you can modify the following macros in `Code_ESP32_RainMaker_4Relay_EEPROM.ino`:
-
-```cpp
-#define RELAY_ON   HIGH     // Set to LOW if your relays are Active-LOW
-#define RELAY_OFF  LOW      // Set to HIGH if your relays are Active-LOW
-```
-
----
-
-## Provisioning Details
-
-To connect the device to your local WiFi network:
-1. Download and open the **ESP RainMaker** mobile app.
-2. Power on the ESP32 module.
-3. Scan the QR code or use the following manual BLE credentials:
-   - **Service Name:** `PROV_12345`
-   - **Proof of Possession (PoP):** `1234567`
-
----
-
-## Development & Installation
-
-### Prerequisites
-
-1. Install [Arduino IDE](https://www.arduino.cc/en/software).
-2. Install the ESP32 Board package (Tools > Board > Boards Manager > search for `esp32`).
-3. Select **ESP32 Dev Module** as your target board.
-4. Ensure the **ESP RainMaker** library is installed and updated.
-
-### Setup Instructions
-
-1. Clone or download this repository.
-2. Open `Code_ESP32_RainMaker_4Relay_EEPROM.ino` in Arduino IDE.
-3. Configure your relay logic (Active-High or Active-Low).
-4. Connect the ESP32 to your computer.
-5. Select the correct COM port and click **Upload**.
+1. **Install Dependencies:**
+   Ensure you have the ESP32 board package and the **ESP RainMaker** library installed in your Arduino IDE.
+2. **Configure Logic:**
+   Check your relay module. If it activates on a `LOW` signal, modify these lines in the code:
+   ```cpp
+   #define RELAY_ON   LOW
+   #define RELAY_OFF  HIGH
+   ```
+3. **Upload:** Select your ESP32 board and upload the code.
+4. **Provision:** 
+   * Open the **ESP RainMaker** mobile app.
+   * Scan the generated QR code (from Serial Monitor) or provision via BLE.
+   * **Service Name:** `PROV_12345`
+   * **PoP:** `1234567`
