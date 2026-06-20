@@ -4,6 +4,7 @@
  **********************************************************************************/
 
 #include <EEPROM.h>
+#include <nvs_flash.h> // <-- Added the correct memory wipe library
 #include "RMaker.h"
 #include "WiFi.h"
 #include "WiFiProv.h"
@@ -12,8 +13,9 @@
 #define ENABLE_EEPROM       true
 #define EEPROM_SIZE         10
 
-#define RELAY_ON   HIGH     // Active-LOW relay (Change to LOW if relays are Active-LOW)
-#define RELAY_OFF  LOW
+// Logic inverted: Active-LOW relays turn ON when the pin is pulled LOW
+#define RELAY_ON    LOW    
+#define RELAY_OFF   HIGH
 
 const char *service_name = "PROV_12345";
 const char *pop = "1234567";
@@ -106,10 +108,22 @@ void write_callback(Device *device, Param *param,
 // ================== SETUP ==================
 void setup() {
   Serial.begin(115200);
+  delay(1000); // Give the serial monitor a second to connect
+  Serial.println("\n--- ESP32 IS ALIVE ---");
+
+  // --- HARDWARE MEMORY WIPE (NVS) ---
+  /*
+  nvs_flash_erase();
+  nvs_flash_init();
+  Serial.println("Memory wiped. Ready for new Wi-Fi credentials.");
+  */
+  // ----------------------------------
+
+  digitalWrite(14, 1);
   
   if (ENABLE_EEPROM) EEPROM.begin(EEPROM_SIZE);
 
-  // Boot-safe OFF (Set pins to known state before making them outputs)
+  // Boot-safe OFF (Since logic is inverted, RELAY_OFF will safely pull these HIGH)
   digitalWrite(RelayPin1, RELAY_OFF);
   digitalWrite(RelayPin2, RELAY_OFF);
   digitalWrite(RelayPin3, RELAY_OFF);
@@ -146,7 +160,8 @@ void setup() {
   my_node.addDevice(my_switch3);
   my_node.addDevice(my_switch4);
 
-  RMaker.enableOTA(OTA_USING_PARAMS);
+  // <-- Changed to TOPICS so the cloud OTA dashboard actually works
+  RMaker.enableOTA(OTA_USING_TOPICS); 
   RMaker.enableTZService();
   RMaker.enableSchedule();
   RMaker.start();
